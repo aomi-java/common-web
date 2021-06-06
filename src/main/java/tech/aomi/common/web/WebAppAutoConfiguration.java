@@ -15,7 +15,7 @@ import tech.aomi.common.web.interceptor.ApplicationInterceptor;
  * @author Sean sean.snow@live.com
  */
 @Configuration
-@ConditionalOnProperty(prefix = "tech-aomi.autoconfigure.web.app", name = "enabled", havingValue = "true")
+@ConditionalOnProperty(prefix = "aomi-tech.autoconfigure.web.app", name = "enabled", havingValue = "true", matchIfMissing = true)
 public class WebAppAutoConfiguration implements WebMvcConfigurer {
 
     @Autowired

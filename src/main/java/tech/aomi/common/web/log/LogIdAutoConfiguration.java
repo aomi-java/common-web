@@ -20,7 +20,7 @@ import java.util.UUID;
 
 @Slf4j
 @Configuration
-@ConditionalOnProperty(prefix = "tech-aomi.autoconfigure.web.log-id", name = "enabled", havingValue = "true")
+@ConditionalOnProperty(prefix = "aomi-tech.autoconfigure.web.log-id", name = "enabled", havingValue = "true", matchIfMissing = true)
 public class LogIdAutoConfiguration extends OncePerRequestFilter {
 
     private static final String ID = "logId";

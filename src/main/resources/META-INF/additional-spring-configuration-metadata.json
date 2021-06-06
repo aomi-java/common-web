@@ -1,0 +1,28 @@
+{
+  "properties": [
+    {
+      "name": "aomi-tech.autoconfigure.web.log-id.enabled",
+      "type": "java.lang.Boolean",
+      "description": "是否启用日志追踪ID；默认为true",
+      "defaultValue": true
+    },
+    {
+      "name": "aomi-tech.autoconfigure.web.app.enabled",
+      "type": "java.lang.Boolean",
+      "description": "是否启用Web应用自动配置；默认为true",
+      "defaultValue": true
+    },
+    {
+      "name": "aomi-tech.autoconfigure.web.error.enabled",
+      "type": "java.lang.Boolean",
+      "description": "是否启用Web错误自动JSON渲染;默认为true",
+      "defaultValue": true
+    },
+    {
+      "name": "aomi-tech.autoconfigure.web.exception.enabled",
+      "type": "java.lang.Boolean",
+      "description": "是否启用Web异常JSON渲染;默认为true",
+      "defaultValue": true
+    }
+  ]
+}

@@ -16,7 +16,7 @@ import tech.aomi.common.web.controller.ErrorControllerImpl;
  */
 @Configuration
 @AutoConfigureBefore(ErrorMvcAutoConfiguration.class)
-@ConditionalOnProperty(prefix = "tech-aomi.autoconfigure.web.error", name = "enabled", havingValue = "true")
+@ConditionalOnProperty(prefix = "aomi-tech.autoconfigure.web.error", name = "enabled", havingValue = "true", matchIfMissing = true)
 public class WebErrorConfiguration {
 
     @Bean

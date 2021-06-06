@@ -28,7 +28,7 @@ import java.util.Map;
 @Slf4j
 @Configuration
 @RestControllerAdvice
-@ConditionalOnProperty(prefix = "tech-aomi.autoconfigure.web.exception", name = "enabled", havingValue = "true")
+@ConditionalOnProperty(prefix = "aomi-tech.autoconfigure.web.exception", name = "enabled", havingValue = "true", matchIfMissing = true)
 public class RestControllerExceptionHandlerController {
 
     @ExceptionHandler({IllegalArgumentException.class, ServletRequestBindingException.class, HttpMessageNotReadableException.class})
