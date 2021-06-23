@@ -2,6 +2,7 @@ package tech.aomi.common.web.log;
 
 import lombok.extern.slf4j.Slf4j;
 import org.slf4j.MDC;
+import org.springframework.boot.autoconfigure.condition.ConditionalOnClass;
 import org.springframework.boot.autoconfigure.condition.ConditionalOnProperty;
 import org.springframework.boot.task.TaskExecutorBuilder;
 import org.springframework.context.annotation.Bean;
@@ -20,6 +21,7 @@ import java.util.UUID;
 
 @Slf4j
 @Configuration
+@ConditionalOnClass(OncePerRequestFilter.class)
 @ConditionalOnProperty(prefix = "aomi-tech.autoconfigure.web.log-id", name = "enabled", havingValue = "true", matchIfMissing = true)
 public class LogIdAutoConfiguration extends OncePerRequestFilter {
 

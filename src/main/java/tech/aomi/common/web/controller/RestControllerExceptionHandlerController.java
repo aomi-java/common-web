@@ -1,6 +1,7 @@
 package tech.aomi.common.web.controller;
 
 import lombok.extern.slf4j.Slf4j;
+import org.springframework.boot.autoconfigure.condition.ConditionalOnClass;
 import org.springframework.boot.autoconfigure.condition.ConditionalOnProperty;
 import org.springframework.context.annotation.Configuration;
 import org.springframework.http.converter.HttpMessageNotReadableException;
@@ -28,6 +29,7 @@ import java.util.Map;
 @Slf4j
 @Configuration
 @RestControllerAdvice
+@ConditionalOnClass(HttpServletRequest.class)
 @ConditionalOnProperty(prefix = "aomi-tech.autoconfigure.web.exception", name = "enabled", havingValue = "true", matchIfMissing = true)
 public class RestControllerExceptionHandlerController {
 

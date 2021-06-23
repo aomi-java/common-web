@@ -1,6 +1,7 @@
 package tech.aomi.common.web;
 
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.boot.autoconfigure.condition.ConditionalOnClass;
 import org.springframework.boot.autoconfigure.condition.ConditionalOnMissingBean;
 import org.springframework.boot.autoconfigure.condition.ConditionalOnProperty;
 import org.springframework.context.ApplicationContext;
@@ -15,6 +16,7 @@ import tech.aomi.common.web.interceptor.ApplicationInterceptor;
  * @author Sean sean.snow@live.com
  */
 @Configuration
+@ConditionalOnClass(WebMvcConfigurer.class)
 @ConditionalOnProperty(prefix = "aomi-tech.autoconfigure.web.app", name = "enabled", havingValue = "true", matchIfMissing = true)
 public class WebAppAutoConfiguration implements WebMvcConfigurer {
 
