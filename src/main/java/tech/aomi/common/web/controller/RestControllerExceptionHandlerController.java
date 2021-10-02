@@ -45,7 +45,7 @@ public class RestControllerExceptionHandlerController {
         Map<String, Object> args = new HashMap<>();
         args.put("name", e.getName());
         args.put("parameter", e.getParameter());
-        return Result.create(ErrorCode.PARAMS_ERROR, e.getMessage(), args);
+        return Result.create(ErrorCode.PARAMS_ERROR, null, args);
     }
 
     @ExceptionHandler(MissingServletRequestParameterException.class)
@@ -54,7 +54,7 @@ public class RestControllerExceptionHandlerController {
         Map<String, Object> args = new HashMap<>();
         args.put("parameterName", e.getParameterName());
         args.put("parameterType", e.getParameterType());
-        return Result.create(ErrorCode.PARAMS_ERROR, e.getMessage(), args);
+        return Result.create(ErrorCode.PARAMS_ERROR, null, args);
     }
 
     @ExceptionHandler(BindException.class)
@@ -63,7 +63,7 @@ public class RestControllerExceptionHandlerController {
         List<FieldError> errors = e.getFieldErrors();
         Map<String, String> errorMsg = new HashMap<>();
         errors.forEach(fieldError -> errorMsg.put(fieldError.getField(), fieldError.getDefaultMessage()));
-        return Result.create(ErrorCode.PARAMS_ERROR, e.getMessage(), errorMsg);
+        return Result.create(ErrorCode.PARAMS_ERROR, null, errorMsg);
     }
 
     @ExceptionHandler(MethodArgumentNotValidException.class)
@@ -73,7 +73,7 @@ public class RestControllerExceptionHandlerController {
         for (FieldError error : e.getBindingResult().getFieldErrors()) {
             args.put(error.getField(), error.getDefaultMessage());
         }
-        return Result.create(ErrorCode.PARAMS_ERROR, e.getMessage(), args);
+        return Result.create(ErrorCode.PARAMS_ERROR, null, args);
     }
 
     @ExceptionHandler(ServiceException.class)
