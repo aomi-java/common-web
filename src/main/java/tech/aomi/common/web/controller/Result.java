@@ -4,16 +4,14 @@ import com.fasterxml.jackson.annotation.JsonCreator;
 import com.fasterxml.jackson.annotation.JsonProperty;
 import org.springframework.http.HttpHeaders;
 import org.springframework.http.HttpStatus;
+import org.springframework.http.MediaType;
 import org.springframework.http.ResponseEntity;
 import org.springframework.util.StringUtils;
 import tech.aomi.common.exception.ErrorCode;
 
 import java.io.Serializable;
 import java.lang.reflect.Method;
-import java.util.ArrayList;
-import java.util.HashMap;
-import java.util.List;
-import java.util.Map;
+import java.util.*;
 
 /**
  * http请求响应结果
@@ -22,7 +20,7 @@ import java.util.Map;
  */
 public class Result extends ResponseEntity<Result.Entity> {
 
-    private Entity entity;
+    private final Entity entity;
 
     private List<Object> listMessage;
 
@@ -61,7 +59,7 @@ public class Result extends ResponseEntity<Result.Entity> {
     }
 
     public Result(String status, String describe, Object payload, HttpStatus httpStatus, HttpHeaders headers) {
-        super(headers, httpStatus);
+        super(checkHeaders(headers), httpStatus);
         this.entity = new Entity();
         this.setStatus(status);
         this.setDescribe(describe);
@@ -85,8 +83,9 @@ public class Result extends ResponseEntity<Result.Entity> {
         if (null == this.listMessage) {
             this.listMessage = new ArrayList<>(5);
         }
-        if (null != message)
+        if (null != message) {
             this.listMessage.add(message);
+        }
     }
 
     /**
@@ -145,11 +144,13 @@ public class Result extends ResponseEntity<Result.Entity> {
         }
         ArrayList<Object> result = new ArrayList<>(3);
 
-        if (null != this.listMessage && !this.listMessage.isEmpty())
+        if (null != this.listMessage && !this.listMessage.isEmpty()) {
             result.addAll(this.listMessage);
+        }
 
-        if (null != this.mapMessage && !this.mapMessage.isEmpty())
+        if (null != this.mapMessage && !this.mapMessage.isEmpty()) {
             result.add(this.mapMessage);
+        }
         if (result.isEmpty()) {
             this.entity.setPayload(null);
         } else {
@@ -161,6 +162,12 @@ public class Result extends ResponseEntity<Result.Entity> {
     @Override
     public boolean hasBody() {
         return null != this.listMessage && !this.listMessage.isEmpty() || null != this.mapMessage && !this.mapMessage.isEmpty();
+    }
+
+    private static HttpHeaders checkHeaders(HttpHeaders headers) {
+        headers = Optional.ofNullable(headers).orElse(new HttpHeaders());
+        headers.setContentType(MediaType.APPLICATION_JSON);
+        return null;
     }
 
     public static class Entity implements java.io.Serializable {
