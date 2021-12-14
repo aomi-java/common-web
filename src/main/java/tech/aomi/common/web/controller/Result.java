@@ -165,7 +165,8 @@ public class Result extends ResponseEntity<Result.Entity> {
     }
 
     private static HttpHeaders checkHeaders(HttpHeaders headers) {
-        HttpHeaders result = new HttpHeaders(Optional.ofNullable(headers).orElse(new HttpHeaders()));
+        HttpHeaders result = new HttpHeaders();
+        result.putAll(Optional.ofNullable(headers).orElse(new HttpHeaders()));
         result.setContentType(MediaType.APPLICATION_JSON);
         return result;
     }
