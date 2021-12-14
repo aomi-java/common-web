@@ -165,9 +165,9 @@ public class Result extends ResponseEntity<Result.Entity> {
     }
 
     private static HttpHeaders checkHeaders(HttpHeaders headers) {
-        headers = Optional.ofNullable(headers).orElse(new HttpHeaders());
-        headers.setContentType(MediaType.APPLICATION_JSON);
-        return headers;
+        HttpHeaders result = new HttpHeaders(Optional.ofNullable(headers).orElse(new HttpHeaders()));
+        result.setContentType(MediaType.APPLICATION_JSON);
+        return result;
     }
 
     public static class Entity implements java.io.Serializable {
