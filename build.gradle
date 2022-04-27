@@ -9,7 +9,7 @@ apply from: 'https://onegit.com/enterprise/public/raw/master/libraries.gradle'
 apply from: 'https://onegit.com/enterprise/public/raw/master/java.gradle'
 apply from: 'https://onegit.com/enterprise/public/raw/master/idea.gradle'
 //apply from: 'https://onegit.com/enterprise/public/raw/master/publishing-with-source.gradle'
- apply from: 'https://onegit.com/enterprise/public/raw/master/publish-center.gradle'
+apply from: 'https://onegit.com/enterprise/public/raw/master/publish-center.gradle'
 
 repositories {
     maven { url "${project.'repo.url'}" }
