@@ -21,6 +21,9 @@ public class IsInValidator implements ConstraintValidator<IsIn, Object> {
 
     @Override
     public boolean isValid(Object value, ConstraintValidatorContext context) {
+        if (null == value) {
+            return false;
+        }
         return this.value.contains(value.toString());
     }
 }
