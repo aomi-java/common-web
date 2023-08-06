@@ -7,12 +7,16 @@ import jakarta.servlet.http.HttpServletResponse;
 import lombok.extern.slf4j.Slf4j;
 import org.slf4j.MDC;
 import org.springframework.boot.autoconfigure.condition.ConditionalOnClass;
+import org.springframework.boot.autoconfigure.condition.ConditionalOnMissingBean;
 import org.springframework.boot.autoconfigure.condition.ConditionalOnProperty;
 import org.springframework.boot.task.TaskExecutorBuilder;
+import org.springframework.boot.task.TaskExecutorCustomizer;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
+import org.springframework.context.annotation.Lazy;
 import org.springframework.core.Ordered;
 import org.springframework.core.annotation.Order;
+import org.springframework.scheduling.annotation.AsyncAnnotationBeanPostProcessor;
 import org.springframework.scheduling.concurrent.ThreadPoolTaskExecutor;
 import org.springframework.web.filter.OncePerRequestFilter;
 import tech.aomi.common.constant.HttpHeader;
@@ -20,6 +24,9 @@ import tech.aomi.common.constant.HttpHeader;
 import java.io.IOException;
 import java.util.Objects;
 import java.util.UUID;
+import java.util.concurrent.Executor;
+
+import static org.springframework.boot.autoconfigure.task.TaskExecutionAutoConfiguration.APPLICATION_TASK_EXECUTOR_BEAN_NAME;
 
 @Slf4j
 @Order(Ordered.HIGHEST_PRECEDENCE)
@@ -32,13 +39,17 @@ public class LogIdAutoConfiguration extends OncePerRequestFilter {
 
     private static final String START_AT = "START_AT";
 
-    @Bean(name = {"applicationTaskExecutor", "taskExecutor"})
-    public ThreadPoolTaskExecutor applicationTaskExecutor(TaskExecutorBuilder builder) {
-        ThreadPoolTaskExecutor executor = builder.build();
-        executor.setTaskDecorator(new MDCTaskDecorator(ID));
-        return executor;
-    }
+//    @Bean(name = {"applicationTaskExecutor", "taskExecutor"})
+//    public ThreadPoolTaskExecutor applicationTaskExecutor(TaskExecutorBuilder builder) {
+//        ThreadPoolTaskExecutor executor = builder.build();
+//        executor.setTaskDecorator(new MDCTaskDecorator(ID));
+//        return executor;
+//    }
 
+    @Bean
+    public TaskExecutorCustomizer myTaskExecutorCustomizer() {
+        return (builder) -> builder.setTaskDecorator(new MDCTaskDecorator(ID));
+    }
 
     @Override
     protected void doFilterInternal(HttpServletRequest request, HttpServletResponse response, FilterChain filterChain) throws ServletException, IOException {
