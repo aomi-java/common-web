@@ -16,6 +16,7 @@ import org.springframework.context.annotation.Configuration;
 import org.springframework.context.annotation.Lazy;
 import org.springframework.core.Ordered;
 import org.springframework.core.annotation.Order;
+import org.springframework.core.task.TaskDecorator;
 import org.springframework.scheduling.annotation.AsyncAnnotationBeanPostProcessor;
 import org.springframework.scheduling.concurrent.ThreadPoolTaskExecutor;
 import org.springframework.web.filter.OncePerRequestFilter;
@@ -39,16 +40,9 @@ public class LogIdAutoConfiguration extends OncePerRequestFilter {
 
     private static final String START_AT = "START_AT";
 
-//    @Bean(name = {"applicationTaskExecutor", "taskExecutor"})
-//    public ThreadPoolTaskExecutor applicationTaskExecutor(TaskExecutorBuilder builder) {
-//        ThreadPoolTaskExecutor executor = builder.build();
-//        executor.setTaskDecorator(new MDCTaskDecorator(ID));
-//        return executor;
-//    }
-
     @Bean
-    public TaskExecutorCustomizer myTaskExecutorCustomizer() {
-        return (builder) -> builder.setTaskDecorator(new MDCTaskDecorator(ID));
+    public TaskDecorator mdcTaskDecorator() {
+        return new MDCTaskDecorator(ID);
     }
 
     @Override
