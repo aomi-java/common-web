@@ -1,5 +1,0 @@
-org.springframework.boot.autoconfigure.EnableAutoConfiguration=\
-tech.aomi.common.web.log.LogIdAutoConfiguration, \
-tech.aomi.common.web.WebAppAutoConfiguration, \
-tech.aomi.common.web.WebErrorConfiguration,\
-tech.aomi.common.web.controller.RestControllerExceptionHandlerController
