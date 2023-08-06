@@ -1,6 +1,7 @@
 package tech.aomi.common.web.util;
 
-import javax.servlet.http.HttpServletRequest;
+
+import jakarta.servlet.http.HttpServletRequest;
 
 /**
  * HttpServletRequest 工具包

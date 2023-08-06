@@ -1,5 +1,6 @@
 package tech.aomi.common.web.controller;
 
+import jakarta.servlet.http.HttpServletRequest;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.autoconfigure.web.ServerProperties;
@@ -9,12 +10,11 @@ import org.springframework.http.HttpInputMessage;
 import org.springframework.http.converter.HttpMessageConverter;
 import org.springframework.web.servlet.mvc.method.annotation.RequestBodyAdviceAdapter;
 
-import javax.servlet.http.HttpServletRequest;
 import java.io.*;
 import java.lang.reflect.Type;
 
 /**
- * @author 田尘殇Sean(sean.snow @ live.com) createAt 2018/6/12
+ * @author Sean createAt 2018/6/12
  */
 @Slf4j
 public abstract class AbstractRequestSignVerifyHandler extends RequestBodyAdviceAdapter {

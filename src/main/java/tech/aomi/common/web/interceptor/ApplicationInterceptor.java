@@ -1,13 +1,12 @@
 package tech.aomi.common.web.interceptor;
 
+import jakarta.servlet.http.HttpServletRequest;
+import jakarta.servlet.http.HttpServletResponse;
 import org.springframework.context.ApplicationContext;
 import org.springframework.web.method.HandlerMethod;
 import org.springframework.web.servlet.HandlerInterceptor;
 import org.springframework.web.servlet.ModelAndView;
-import org.springframework.web.servlet.handler.HandlerInterceptorAdapter;
 
-import javax.servlet.http.HttpServletRequest;
-import javax.servlet.http.HttpServletResponse;
 import java.lang.reflect.Method;
 
 /**
@@ -15,7 +14,7 @@ import java.lang.reflect.Method;
  *
  * @author Sean sean.snow@live.com
  */
-public class ApplicationInterceptor extends HandlerInterceptorAdapter {
+public class ApplicationInterceptor implements HandlerInterceptor {
 
     private final ApplicationContext applicationContext;
 
@@ -26,7 +25,7 @@ public class ApplicationInterceptor extends HandlerInterceptorAdapter {
     @Override
     public boolean preHandle(HttpServletRequest request, HttpServletResponse response, Object handler) throws Exception {
         if (!(handler instanceof HandlerMethod)) {
-            return super.preHandle(request, response, handler);
+            return true;
         }
 
         HandlerMethod handlerMethod = (HandlerMethod) handler;

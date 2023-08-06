@@ -14,7 +14,8 @@ import org.springframework.context.annotation.Configuration;
 import tech.aomi.common.web.controller.ErrorControllerImpl;
 
 /**
- * @author 田尘殇Sean(sean.snow @ live.com) createAt 2018/9/5
+ * web 错误处理bean自动配置
+ * @author Sean
  */
 @Configuration
 @AutoConfigureBefore(ErrorMvcAutoConfiguration.class)

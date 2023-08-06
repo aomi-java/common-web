@@ -1,23 +1,40 @@
 plugins {
-    id "io.franzbecker.gradle-lombok" version "2.2"
+    id 'java'
+    id "io.freefair.lombok" version "8.1.0"
+    id 'io.spring.dependency-management' version '1.1.2'
 }
+ext.spring_boot_version = "3.1.2"
+ext.spring_cloud_version = "2022.0.3"
+
 
 group 'tech.aomi.common'
-version '1.0.5_10-SNAPSHOT'
+version '2.0.0-SNAPSHOT'
 
-apply from: 'https://onegit.com/enterprise/public/raw/master/libraries.gradle'
-apply from: 'https://onegit.com/enterprise/public/raw/master/java.gradle'
+apply from: 'https://onegit.com/enterprise/public/raw/master/spring-libraries.gradle'
 apply from: 'https://onegit.com/enterprise/public/raw/master/idea.gradle'
-//apply from: 'https://onegit.com/enterprise/public/raw/master/publishing-with-source.gradle'
 apply from: 'https://onegit.com/enterprise/public/raw/master/publish-center.gradle'
 
+java {
+    sourceCompatibility = JavaVersion.VERSION_20
+}
+
 repositories {
-    maven { url "${project.'repo.url'}" }
     mavenCentral()
+    maven {
+        url "https://s01.oss.sonatype.org/content/repositories/snapshots/"
+    }
+}
+
+dependencyManagement {
+    imports {
+        mavenBom "org.springframework.boot:spring-boot-dependencies:${spring_boot_version}"
+        mavenBom "org.springframework.cloud:spring-cloud-dependencies:${spring_cloud_version}"
+    }
 }
 
 dependencies {
-    compileOnly lib.spring_boot_web
+    implementation spring_boot.web
+    implementation spring_boot.validation
 
-    compileOnly "tech.aomi.common:exception:1.0.1-SNAPSHOT"
+    implementation "tech.aomi.common:exception:1.0.1-SNAPSHOT"
 }
