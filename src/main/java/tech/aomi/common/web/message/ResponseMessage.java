@@ -14,7 +14,7 @@ import java.util.Map;
  */
 @Getter
 @Setter
-@ToString
+@ToString(callSuper = true)
 public class ResponseMessage extends AbstractMessage implements java.io.Serializable {
 
     @Serial

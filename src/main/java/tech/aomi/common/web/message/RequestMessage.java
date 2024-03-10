@@ -23,7 +23,7 @@ import java.util.Optional;
  */
 @Getter
 @Setter
-@ToString
+@ToString(callSuper = true)
 @NoArgsConstructor
 public class RequestMessage extends AbstractMessage implements java.io.Serializable {
 

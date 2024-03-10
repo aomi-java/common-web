@@ -2,12 +2,14 @@ package tech.aomi.common.web.message;
 
 import lombok.Getter;
 import lombok.Setter;
+import lombok.ToString;
 
 import java.nio.charset.Charset;
 import java.nio.charset.StandardCharsets;
 
 @Getter
 @Setter
+@ToString
 public abstract class AbstractMessage {
     /**
      * 发送请求的时间
