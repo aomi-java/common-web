@@ -1,14 +1,14 @@
 plugins {
     id 'java'
     id "io.freefair.lombok" version "8.1.0"
-    id 'io.spring.dependency-management' version '1.1.2'
+    id 'io.spring.dependency-management' version '1.1.4'
 }
-ext.spring_boot_version = "3.1.2"
+ext.spring_boot_version = "3.1.4"
 ext.spring_cloud_version = "2022.0.3"
 
 
 group 'tech.aomi.common'
-version '2.0.0_3-SNAPSHOT'
+version '2.1.1_0-SNAPSHOT'
 
 apply from: 'https://onegit.com/enterprise/public/raw/master/spring-libraries.gradle'
 apply from: 'https://onegit.com/enterprise/public/raw/master/idea.gradle'
@@ -33,8 +33,12 @@ dependencyManagement {
 }
 
 dependencies {
-    implementation spring_boot.web
-    implementation spring_boot.validation
+    compileOnly spring_boot.web
+    compileOnly spring_boot.validation
 
-    implementation "tech.aomi.common:exception:1.0.1-SNAPSHOT"
+    compileOnly 'commons-codec:commons-codec:1.16.1'
+
+    compileOnly 'tech.aomi.common:exception:1.0.2-SNAPSHOT'
+    compileOnly 'tech.aomi.common:utils:1.0.13_0-SNAPSHOT'
+
 }
