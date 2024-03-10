@@ -65,10 +65,10 @@ public abstract class AbstractMessageSignVerifyFilter extends OncePerRequestFilt
                 MultiValueMap<String, String> data = new MultiValueMapAdapter<>(new HashMap<>());
                 request.getParameterMap().forEach((k, v) -> data.put(k, List.of(v)));
                 RequestMessage message = new RequestMessage(data);
-                content = toMessageContent(message);
+                content = toMessageContent(request, message);
             } else {
                 byte[] requestBody = StreamUtils.copyToByteArray(request.getInputStream());
-                content = toMessageContent(requestBody);
+                content = toMessageContent(request, requestBody);
             }
             verify(content);
             byte[] newBody = payloadPlaintext(content);
@@ -108,9 +108,9 @@ public abstract class AbstractMessageSignVerifyFilter extends OncePerRequestFilt
     }
 
 
-    protected abstract MessageContent toMessageContent(RequestMessage message);
+    protected abstract MessageContent toMessageContent(HttpServletRequest request, RequestMessage message);
 
-    protected abstract MessageContent toMessageContent(byte[] body);
+    protected abstract MessageContent toMessageContent(HttpServletRequest request, byte[] body);
 
     /**
      * 对responseBody进行预处理。
