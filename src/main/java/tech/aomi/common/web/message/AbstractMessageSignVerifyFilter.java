@@ -41,7 +41,7 @@ import java.util.UUID;
 @Slf4j
 @Getter
 @AllArgsConstructor
-public abstract class AbstractMessageSignVerifyFilter extends OncePerRequestFilter implements ResponseBodyAdvice<Object> {
+public abstract class AbstractMessageSignVerifyFilter extends OncePerRequestFilter {
 
     private String signAlgorithm;
     private String aesTransformation;

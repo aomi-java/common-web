@@ -8,7 +8,7 @@ ext.spring_cloud_version = "2022.0.3"
 
 
 group 'tech.aomi.common'
-version '2.1.1_1-SNAPSHOT'
+version '2.1.1_2-SNAPSHOT'
 
 apply from: 'https://onegit.com/enterprise/public/raw/master/spring-libraries.gradle'
 apply from: 'https://onegit.com/enterprise/public/raw/master/idea.gradle'
