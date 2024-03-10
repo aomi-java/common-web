@@ -84,10 +84,10 @@ public class ExceptionResultHandler {
 
 
     public static Result exception(Throwable ex) {
-        LOGGER.error("发生无法预料的错误:{}", ex.getMessage(), ex);
         if (ex instanceof ServiceException) {
             return servicesException((ServiceException) ex);
         }
+        LOGGER.error("请求执行错误:{}", ex.getMessage(), ex);
         return Result.create(ErrorCode.EXCEPTION, ex.getMessage(), null);
     }
 
