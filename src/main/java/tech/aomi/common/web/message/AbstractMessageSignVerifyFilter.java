@@ -23,6 +23,8 @@ import tech.aomi.common.exception.ServiceException;
 import tech.aomi.common.exception.SignatureException;
 import tech.aomi.common.utils.crypto.AesUtils;
 import tech.aomi.common.utils.crypto.RSAUtil;
+import tech.aomi.common.web.controller.ExceptionResultHandler;
+import tech.aomi.common.web.controller.Result;
 
 import java.io.ByteArrayInputStream;
 import java.io.IOException;
@@ -59,22 +61,20 @@ public abstract class AbstractMessageSignVerifyFilter extends OncePerRequestFilt
     protected void doFilterInternal(HttpServletRequest request, HttpServletResponse response, FilterChain filterChain) throws ServletException, IOException {
 
         ContentCachingResponseWrapper responseWrapper = new ContentCachingResponseWrapper(response);
-
-
-        MessageContent content;
-        if ("get".equalsIgnoreCase(request.getMethod())) {
-            MultiValueMap<String, String> data = new MultiValueMapAdapter<>(new HashMap<>());
-            request.getParameterMap().forEach((k, v) -> data.put(k, List.of(v)));
-            RequestMessage message = new RequestMessage(data);
-            content = toMessageContent(message);
-        } else {
-            byte[] requestBody = StreamUtils.copyToByteArray(request.getInputStream());
-            content = toMessageContent(requestBody);
-        }
-        verify(content);
-        byte[] newBody = payloadPlaintext(content);
-
         try {
+            MessageContent content;
+            if ("get".equalsIgnoreCase(request.getMethod())) {
+                MultiValueMap<String, String> data = new MultiValueMapAdapter<>(new HashMap<>());
+                request.getParameterMap().forEach((k, v) -> data.put(k, List.of(v)));
+                RequestMessage message = new RequestMessage(data);
+                content = toMessageContent(message);
+            } else {
+                byte[] requestBody = StreamUtils.copyToByteArray(request.getInputStream());
+                content = toMessageContent(requestBody);
+            }
+            verify(content);
+            byte[] newBody = payloadPlaintext(content);
+
             filterChain.doFilter(new MessageSignVerifyRequestWrapper(request, newBody), responseWrapper);
             byte[] responseBody = responseWrapper.getContentAsByteArray();
 
@@ -97,6 +97,10 @@ public abstract class AbstractMessageSignVerifyFilter extends OncePerRequestFilt
             responseWrapper.resetBuffer();
             responseWrapper.getOutputStream().write(toBytes(message));
 
+        } catch (Exception ex) {
+            var result = ExceptionResultHandler.getResult(ex);
+            responseWrapper.resetBuffer();
+            responseWrapper.getOutputStream().write(toBytes(result.getBody()));
         } finally {
             responseWrapper.copyBodyToResponse();
         }
@@ -114,7 +118,7 @@ public abstract class AbstractMessageSignVerifyFilter extends OncePerRequestFilt
      */
     protected abstract void responseHandler(MessageContent content);
 
-    protected abstract byte[] toBytes(ResponseMessage message);
+    protected abstract byte[] toBytes(Object message);
 
     protected void verify(MessageContent content) throws ServiceException {
         RequestMessage body = content.getRequestMessage();
