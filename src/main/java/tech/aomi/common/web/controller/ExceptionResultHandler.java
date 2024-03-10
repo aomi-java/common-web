@@ -34,7 +34,7 @@ public class ExceptionResultHandler {
 
             .build();
 
-    public static Result getResult(Throwable t){
+    public static Result getResult(Throwable t) {
         Function<Throwable, Result> handler = HANDLERS.getOrDefault(t.getClass().getName(), ExceptionResultHandler::exception);
         return handler.apply(t);
     }
@@ -85,6 +85,9 @@ public class ExceptionResultHandler {
 
     public static Result exception(Throwable ex) {
         LOGGER.error("发生无法预料的错误:{}", ex.getMessage(), ex);
+        if (ex instanceof ServiceException) {
+            return servicesException((ServiceException) ex);
+        }
         return Result.create(ErrorCode.EXCEPTION, ex.getMessage(), null);
     }
 
