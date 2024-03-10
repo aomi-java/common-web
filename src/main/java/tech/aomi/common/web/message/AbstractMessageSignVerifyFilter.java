@@ -144,7 +144,9 @@ public abstract class AbstractMessageSignVerifyFilter extends OncePerRequestFilt
         String signData = body.getTimestamp() + body.getRandomString() + body.getPayload();
         LOGGER.debug("请求签名数据: [{}]", signData);
         try {
-            return DigestUtils.sha512(signData.getBytes(body.getCharset()));
+            byte[] data = DigestUtils.sha512(signData.getBytes(body.getCharset()));
+            LOGGER.debug("请求签名数据SHA512: [{}]", new String(data));
+            return data;
         } catch (UnsupportedEncodingException e) {
             throw new IllegalArgumentException("不支持的编码:" + body.getCharset(), e);
         }
@@ -154,7 +156,9 @@ public abstract class AbstractMessageSignVerifyFilter extends OncePerRequestFilt
         String signData = body.getTimestamp() + body.getRandomString() + body.getStatus() + body.getPayload();
         LOGGER.debug("响应签名数据: [{}]", signData);
         try {
-            return DigestUtils.sha512(signData.getBytes(body.getCharset()));
+            byte[] data = DigestUtils.sha512(signData.getBytes(body.getCharset()));
+            LOGGER.debug("响应签名数据SHA512: [{}]", new String(data));
+            return data;
         } catch (UnsupportedEncodingException e) {
             throw new IllegalArgumentException("不支持的编码:" + body.getCharset(), e);
         }
