@@ -11,6 +11,7 @@ import lombok.AllArgsConstructor;
 import lombok.Getter;
 import lombok.extern.slf4j.Slf4j;
 import org.apache.commons.codec.digest.DigestUtils;
+import org.springframework.http.MediaType;
 import org.springframework.util.MultiValueMap;
 import org.springframework.util.MultiValueMapAdapter;
 import org.springframework.util.StreamUtils;
@@ -100,6 +101,7 @@ public abstract class AbstractMessageSignVerifyFilter extends OncePerRequestFilt
         } catch (Exception ex) {
             var result = ExceptionResultHandler.getResult(ex);
             responseWrapper.resetBuffer();
+            responseWrapper.setContentType(MediaType.APPLICATION_JSON_VALUE);
             responseWrapper.getOutputStream().write(toBytes(result.getBody()));
         } finally {
             responseWrapper.copyBodyToResponse();
