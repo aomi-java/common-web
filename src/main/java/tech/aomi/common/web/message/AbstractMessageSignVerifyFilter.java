@@ -61,7 +61,7 @@ public abstract class AbstractMessageSignVerifyFilter extends OncePerRequestFilt
         ContentCachingResponseWrapper responseWrapper = new ContentCachingResponseWrapper(response);
 
 
-        MessageContent<?> content;
+        MessageContent content;
         if ("get".equalsIgnoreCase(request.getMethod())) {
             MultiValueMap<String, String> data = new MultiValueMapAdapter<>(new HashMap<>());
             request.getParameterMap().forEach((k, v) -> data.put(k, List.of(v)));
@@ -79,15 +79,13 @@ public abstract class AbstractMessageSignVerifyFilter extends OncePerRequestFilt
             byte[] responseBody = responseWrapper.getContentAsByteArray();
 
             ResponseMessage message = new ResponseMessage();
-            message.setTimestamp(timestamp());
-            message.setRandomString(UUID.randomUUID().toString());
-            message.setCharset(content.getRequestMessage().getCharset());
-            message.setSignType(content.getRequestMessage().getSignType());
-
             content.setResponseMessage(message);
             content.setResponsePayload(responseBody);
 
             responseHandler(content);
+            message.setRandomString(UUID.randomUUID().toString());
+            message.setCharset(content.getRequestMessage().getCharset());
+            message.setSignType(content.getRequestMessage().getSignType());
 
             byte[] payload = aes(true, content.getTrk(), content.getResponsePayload());
             String payloadStr = Base64.getEncoder().encodeToString(payload);
@@ -105,22 +103,20 @@ public abstract class AbstractMessageSignVerifyFilter extends OncePerRequestFilt
     }
 
 
-    protected abstract MessageContent<?> toMessageContent(RequestMessage message);
+    protected abstract MessageContent toMessageContent(RequestMessage message);
 
-    protected abstract MessageContent<?> toMessageContent(byte[] body);
+    protected abstract MessageContent toMessageContent(byte[] body);
 
     /**
      * 对responseBody进行预处理。
-     * 更新response的status\describe\值
+     * 更新response的status\describe\timespace\值
      * 更新content#responsePayload
      */
-    protected abstract void responseHandler(MessageContent<?> content);
-
-    protected abstract String timestamp();
+    protected abstract void responseHandler(MessageContent content);
 
     protected abstract byte[] toBytes(ResponseMessage message);
 
-    protected void verify(MessageContent<?> content) throws ServiceException {
+    protected void verify(MessageContent content) throws ServiceException {
         RequestMessage body = content.getRequestMessage();
         LOGGER.debug("请求参数签名验证: {}", body);
         byte[] signData = getSignData(body);
@@ -213,7 +209,7 @@ public abstract class AbstractMessageSignVerifyFilter extends OncePerRequestFilt
     /**
      * @param content 请求上下文内容
      */
-    protected byte[] payloadPlaintext(MessageContent<?> content) {
+    protected byte[] payloadPlaintext(MessageContent content) {
         RequestMessage message = content.getRequestMessage();
         LOGGER.debug("解密传输秘钥: [{}]", message.getTrk());
         byte[] trk;

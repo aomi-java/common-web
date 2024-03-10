@@ -13,7 +13,7 @@ import java.security.PublicKey;
  */
 @Getter
 @Setter
-public class MessageContent<C> {
+public class MessageContent {
 
     public static final String MESSAGE_CONTEXT = "AOMI@MESSAGE_CONTEXT";
 
