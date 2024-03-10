@@ -33,10 +33,7 @@ import java.io.UnsupportedEncodingException;
 import java.nio.charset.StandardCharsets;
 import java.security.PrivateKey;
 import java.security.PublicKey;
-import java.util.Base64;
-import java.util.HashMap;
-import java.util.List;
-import java.util.UUID;
+import java.util.*;
 
 /**
  * 报文签名、验签过滤器
@@ -88,9 +85,11 @@ public abstract class AbstractMessageSignVerifyFilter extends OncePerRequestFilt
             message.setCharset(content.getRequestMessage().getCharset());
             message.setSignType(content.getRequestMessage().getSignType());
 
-            byte[] payload = aes(true, content.getTrk(), content.getResponsePayload());
-            String payloadStr = Base64.getEncoder().encodeToString(payload);
-            message.setPayload(payloadStr);
+            if (null != content.getResponsePayload() && content.getResponsePayload().length > 0) {
+                byte[] payload = aes(true, content.getTrk(), content.getResponsePayload());
+                String payloadStr = Base64.getEncoder().encodeToString(payload);
+                message.setPayload(payloadStr);
+            }
 
             String sign = rsaSign(content.getPrivateKey(), getSignData(message));
             message.setSign(sign);
@@ -141,7 +140,7 @@ public abstract class AbstractMessageSignVerifyFilter extends OncePerRequestFilt
     }
 
     protected byte[] getSignData(RequestMessage body) {
-        String signData = body.getTimestamp() + body.getRandomString() + body.getPayload();
+        String signData = body.getTimestamp() + body.getRandomString() + Optional.ofNullable(body.getPayload()).orElse("");
         LOGGER.debug("请求签名数据: [{}]", signData);
         try {
             byte[] data = DigestUtils.sha512(signData.getBytes(body.getCharset()));
@@ -153,7 +152,7 @@ public abstract class AbstractMessageSignVerifyFilter extends OncePerRequestFilt
     }
 
     protected byte[] getSignData(ResponseMessage body) {
-        String signData = body.getTimestamp() + body.getRandomString() + body.getStatus() + body.getPayload();
+        String signData = body.getTimestamp() + body.getRandomString() + body.getStatus() + Optional.ofNullable(body.getPayload()).orElse("");
         LOGGER.debug("响应签名数据: [{}]", signData);
         try {
             byte[] data = DigestUtils.sha512(signData.getBytes(body.getCharset()));
