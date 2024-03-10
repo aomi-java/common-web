@@ -1,26 +1,22 @@
 package tech.aomi.common.web.message;
 
-import jakarta.servlet.*;
+import jakarta.servlet.FilterChain;
+import jakarta.servlet.ReadListener;
+import jakarta.servlet.ServletException;
+import jakarta.servlet.ServletInputStream;
 import jakarta.servlet.http.HttpServletRequest;
 import jakarta.servlet.http.HttpServletRequestWrapper;
 import jakarta.servlet.http.HttpServletResponse;
-import jakarta.servlet.http.HttpServletResponseWrapper;
 import lombok.AllArgsConstructor;
 import lombok.Getter;
 import lombok.extern.slf4j.Slf4j;
 import org.apache.commons.codec.digest.DigestUtils;
-import org.springframework.core.MethodParameter;
-import org.springframework.http.MediaType;
-import org.springframework.http.converter.HttpMessageConverter;
-import org.springframework.http.server.ServerHttpRequest;
-import org.springframework.http.server.ServerHttpResponse;
 import org.springframework.util.MultiValueMap;
 import org.springframework.util.MultiValueMapAdapter;
 import org.springframework.util.StreamUtils;
 import org.springframework.util.StringUtils;
 import org.springframework.web.filter.OncePerRequestFilter;
 import org.springframework.web.servlet.mvc.method.annotation.ResponseBodyAdvice;
-import org.springframework.web.util.ContentCachingRequestWrapper;
 import org.springframework.web.util.ContentCachingResponseWrapper;
 import tech.aomi.common.exception.ErrorCode;
 import tech.aomi.common.exception.ServiceException;
@@ -28,11 +24,16 @@ import tech.aomi.common.exception.SignatureException;
 import tech.aomi.common.utils.crypto.AesUtils;
 import tech.aomi.common.utils.crypto.RSAUtil;
 
-import java.io.*;
+import java.io.ByteArrayInputStream;
+import java.io.IOException;
+import java.io.UnsupportedEncodingException;
 import java.nio.charset.StandardCharsets;
 import java.security.PrivateKey;
 import java.security.PublicKey;
-import java.util.*;
+import java.util.Base64;
+import java.util.HashMap;
+import java.util.List;
+import java.util.UUID;
 
 /**
  * 报文签名、验签过滤器
@@ -40,7 +41,7 @@ import java.util.*;
 @Slf4j
 @Getter
 @AllArgsConstructor
-public abstract class AbstractMessageSignVerifyFilter<T> extends OncePerRequestFilter implements ResponseBodyAdvice<Object> {
+public abstract class AbstractMessageSignVerifyFilter extends OncePerRequestFilter implements ResponseBodyAdvice<Object> {
 
     private String signAlgorithm;
     private String aesTransformation;
