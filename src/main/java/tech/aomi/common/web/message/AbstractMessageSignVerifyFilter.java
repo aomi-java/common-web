@@ -1,5 +1,6 @@
 package tech.aomi.common.web.message;
 
+import com.fasterxml.jackson.core.type.TypeReference;
 import jakarta.servlet.FilterChain;
 import jakarta.servlet.ReadListener;
 import jakarta.servlet.ServletException;
@@ -23,12 +24,12 @@ import tech.aomi.common.exception.ServiceException;
 import tech.aomi.common.exception.SignatureException;
 import tech.aomi.common.utils.crypto.AesUtils;
 import tech.aomi.common.utils.crypto.RSAUtil;
+import tech.aomi.common.utils.json.Json;
 import tech.aomi.common.web.controller.ExceptionResultHandler;
 
 import java.io.ByteArrayInputStream;
 import java.io.IOException;
 import java.io.UnsupportedEncodingException;
-import java.nio.charset.StandardCharsets;
 import java.security.PrivateKey;
 import java.security.PublicKey;
 import java.util.*;
@@ -71,7 +72,19 @@ public abstract class AbstractMessageSignVerifyFilter extends OncePerRequestFilt
             verify(content);
             byte[] newBody = payloadPlaintext(content);
 
-            filterChain.doFilter(new MessageSignVerifyRequestWrapper(request, newBody), responseWrapper);
+
+            Map<String, String[]> modifiableParameters = null;
+            if ("get".equalsIgnoreCase(request.getMethod())) {
+                String newBodyStr = new String(newBody, content.getRequestMessage().charset());
+                Map<String, String> urlArgs = Json.fromJson(newBodyStr, new TypeReference<>() {
+                });
+                modifiableParameters = new HashMap<>();
+                for (String key : urlArgs.keySet()) {
+                    modifiableParameters.put(key, new String[]{urlArgs.get(key)});
+                }
+            }
+
+            filterChain.doFilter(new MessageSignVerifyRequestWrapper(request, modifiableParameters, newBody), responseWrapper);
             byte[] responseBody = responseWrapper.getContentAsByteArray();
 
             ResponseMessage message = new ResponseMessage();
@@ -237,7 +250,7 @@ public abstract class AbstractMessageSignVerifyFilter extends OncePerRequestFilt
             return new byte[0];
         }
         byte[] payload = aes(false, trk, Base64.getDecoder().decode(payloadCiphertext));
-        LOGGER.debug("请求参数明文: [{}]", new String(payload, StandardCharsets.UTF_8));
+        LOGGER.debug("请求参数明文: [{}]", new String(payload, content.getRequestMessage().charset()));
         content.setRequestPayload(payload);
         return payload;
     }
@@ -265,6 +278,8 @@ public abstract class AbstractMessageSignVerifyFilter extends OncePerRequestFilt
 
 
         private final ByteArrayInputStream inputStream;
+        private final Map<String, String[]> modifiableParameters;
+        private Map<String, String[]> allParameters = null;
 
         /**
          * Constructs a request object wrapping the given request.
@@ -272,8 +287,9 @@ public abstract class AbstractMessageSignVerifyFilter extends OncePerRequestFilt
          * @param request The request to wrap
          * @throws IllegalArgumentException if the request is null
          */
-        public MessageSignVerifyRequestWrapper(HttpServletRequest request, byte[] body) {
+        public MessageSignVerifyRequestWrapper(HttpServletRequest request, Map<String, String[]> modifiableParameters, byte[] body) {
             super(request);
+            this.modifiableParameters = Optional.ofNullable(modifiableParameters).orElse(new HashMap<>());
             this.inputStream = new ByteArrayInputStream(body);
         }
 
@@ -300,6 +316,38 @@ public abstract class AbstractMessageSignVerifyFilter extends OncePerRequestFilt
                     return inputStream.read();
                 }
             };
+        }
+
+        @Override
+        public String getParameter(String name) {
+            String[] params = getParameterValues(name);
+            if (params != null && params.length > 0) {
+                return params[0];
+            }
+            return super.getParameter(name);
+        }
+
+        @Override
+        public Map<String, String[]> getParameterMap() {
+            if (allParameters == null) {
+                allParameters = new HashMap<>();
+                allParameters.putAll(super.getParameterMap());
+                allParameters.putAll(modifiableParameters);
+            }
+            return Collections.unmodifiableMap(allParameters);
+        }
+
+        @Override
+        public Enumeration<String> getParameterNames() {
+            return Collections.enumeration(getParameterMap().keySet());
+        }
+
+        @Override
+        public String[] getParameterValues(String name) {
+            if (modifiableParameters.containsKey(name)) {
+                return modifiableParameters.get(name);
+            }
+            return super.getParameterValues(name);
         }
     }
 
