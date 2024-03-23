@@ -62,6 +62,7 @@ public abstract class AbstractMessageSignVerifyFilter extends OncePerRequestFilt
                 messageService = this.getMessageService(request, message);
                 content = messageService.parse(message);
             }
+            request.setAttribute(MessageContent.MESSAGE_CONTEXT, content);
             byte[] newBody = content.getRequestPayload();
 
             Map<String, String[]> modifiableParameters = null;
