@@ -35,7 +35,7 @@ import java.util.*;
 @RequiredArgsConstructor
 public abstract class AbstractMessageSignVerifyFilter extends OncePerRequestFilter {
 
-    private MessageEncodeDecodeService messageEncodeDecodeService;
+    protected final MessageEncodeDecodeService messageEncodeDecodeService;
 
     @Override
     protected void doFilterInternal(HttpServletRequest request, HttpServletResponse response, FilterChain filterChain)
