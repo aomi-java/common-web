@@ -8,7 +8,7 @@ ext.spring_cloud_version = "2022.0.3"
 
 
 group 'tech.aomi.common'
-version '2.1.1_12-SNAPSHOT'
+version '2.1.1_13-SNAPSHOT'
 
 apply from: 'https://onegit.com/enterprise/public/raw/master/spring-libraries.gradle'
 apply from: 'https://onegit.com/enterprise/public/raw/master/idea.gradle'
@@ -40,6 +40,6 @@ dependencies {
 
     compileOnly 'tech.aomi.common:exception:1.0.2-SNAPSHOT'
     compileOnly 'tech.aomi.common:utils:1.0.13_0-SNAPSHOT'
-    compileOnly 'tech.aomi.common:message:1.0.0_0-SNAPSHOT'
+    compileOnly 'tech.aomi.common:message:1.0.0_1-SNAPSHOT'
 
 }

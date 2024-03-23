@@ -1,6 +1,5 @@
 package tech.aomi.common.web.message;
 
-import com.fasterxml.jackson.core.type.TypeReference;
 import jakarta.servlet.FilterChain;
 import jakarta.servlet.ReadListener;
 import jakarta.servlet.ServletException;
@@ -8,16 +7,18 @@ import jakarta.servlet.ServletInputStream;
 import jakarta.servlet.http.HttpServletRequest;
 import jakarta.servlet.http.HttpServletRequestWrapper;
 import jakarta.servlet.http.HttpServletResponse;
-import lombok.AllArgsConstructor;
 import lombok.Getter;
+import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.http.MediaType;
 import org.springframework.util.StreamUtils;
 import org.springframework.web.filter.OncePerRequestFilter;
 import org.springframework.web.util.ContentCachingResponseWrapper;
+
+import tech.aomi.common.message.MessageEncodeDecodeService;
 import tech.aomi.common.message.MessageService;
 import tech.aomi.common.message.entity.MessageContent;
-import tech.aomi.common.utils.json.Json;
+import tech.aomi.common.message.entity.RequestMessage;
 import tech.aomi.common.web.controller.ExceptionResultHandler;
 import tech.aomi.common.web.controller.Result;
 import tech.aomi.common.web.controller.Result.Entity;
@@ -31,14 +32,16 @@ import java.util.*;
  */
 @Slf4j
 @Getter
-@AllArgsConstructor
+@RequiredArgsConstructor
 public abstract class AbstractMessageSignVerifyFilter extends OncePerRequestFilter {
+
+    private MessageEncodeDecodeService messageEncodeDecodeService;
 
     @Override
     protected void doFilterInternal(HttpServletRequest request, HttpServletResponse response, FilterChain filterChain)
             throws ServletException, IOException {
 
-        var messageService = this.getMessageService(request);
+        MessageService messageService;
         ContentCachingResponseWrapper responseWrapper = new ContentCachingResponseWrapper(response);
         try {
             MessageContent content;
@@ -49,18 +52,21 @@ public abstract class AbstractMessageSignVerifyFilter extends OncePerRequestFilt
                     String value = request.getParameter(name);
                     data.put(name, value);
                 }
-                content = messageService.parse(data);
+                var message = new RequestMessage(data);
+                messageService = this.getMessageService(request, message);
+
+                content = messageService.parse(message);
             } else {
                 byte[] requestBody = StreamUtils.copyToByteArray(request.getInputStream());
-                content = messageService.parse(requestBody);
+                var message = this.messageEncodeDecodeService.byte2Message(requestBody, RequestMessage.class);
+                messageService = this.getMessageService(request, message);
+                content = messageService.parse(message);
             }
             byte[] newBody = content.getRequestPayload();
 
             Map<String, String[]> modifiableParameters = null;
             if ("get".equalsIgnoreCase(request.getMethod())) {
-                String newBodyStr = new String(newBody, content.getRequestMessage().charset());
-                Map<String, String> urlArgs = Json.fromJson(newBodyStr, new TypeReference<>() {
-                });
+                Map<String, String> urlArgs = messageEncodeDecodeService.byte2Message(newBody, HashMap.class);
                 modifiableParameters = new HashMap<>();
                 for (String key : urlArgs.keySet()) {
                     modifiableParameters.put(key, new String[] { urlArgs.get(key) });
@@ -70,11 +76,11 @@ public abstract class AbstractMessageSignVerifyFilter extends OncePerRequestFilt
             filterChain.doFilter(new MessageSignVerifyRequestWrapper(request, modifiableParameters, newBody),
                     responseWrapper);
             byte[] responseBody = responseWrapper.getContentAsByteArray();
-            Entity entity = messageService.byte2Message(responseBody, Result.Entity.class);
+            Entity entity = messageEncodeDecodeService.byte2Message(responseBody, Result.Entity.class);
 
             messageService.createResponse(content, entity.getStatus(), entity.getDescribe(), entity.getPayload());
 
-            byte[] newResponseBody = messageService.message2Byte(content.getResponseMessage());
+            byte[] newResponseBody = messageEncodeDecodeService.message2Byte(content.getResponseMessage());
 
             responseWrapper.resetBuffer();
             responseWrapper.getOutputStream().write(newResponseBody);
@@ -83,13 +89,14 @@ public abstract class AbstractMessageSignVerifyFilter extends OncePerRequestFilt
             var result = ExceptionResultHandler.getResult(ex);
             responseWrapper.resetBuffer();
             responseWrapper.setContentType(MediaType.APPLICATION_JSON_VALUE);
-            responseWrapper.getOutputStream().write(messageService.message2Byte(result.getBody()));
+            responseWrapper.getOutputStream().write(messageEncodeDecodeService.message2Byte(result.getBody()));
+
         } finally {
             responseWrapper.copyBodyToResponse();
         }
     }
 
-    protected abstract MessageService getMessageService(HttpServletRequest request);
+    protected abstract MessageService getMessageService(HttpServletRequest request, RequestMessage message);
 
     public static class MessageSignVerifyRequestWrapper extends HttpServletRequestWrapper {
 
