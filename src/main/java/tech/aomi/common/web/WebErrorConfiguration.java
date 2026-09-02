@@ -5,10 +5,10 @@ import org.springframework.boot.autoconfigure.condition.ConditionalOnBean;
 import org.springframework.boot.autoconfigure.condition.ConditionalOnClass;
 import org.springframework.boot.autoconfigure.condition.ConditionalOnMissingBean;
 import org.springframework.boot.autoconfigure.condition.ConditionalOnProperty;
-import org.springframework.boot.autoconfigure.web.ServerProperties;
-import org.springframework.boot.autoconfigure.web.servlet.error.ErrorMvcAutoConfiguration;
-import org.springframework.boot.web.servlet.error.ErrorAttributes;
-import org.springframework.boot.web.servlet.error.ErrorController;
+import org.springframework.boot.autoconfigure.web.ErrorProperties;
+import org.springframework.boot.webmvc.autoconfigure.error.ErrorMvcAutoConfiguration;
+import org.springframework.boot.webmvc.error.ErrorAttributes;
+import org.springframework.boot.webmvc.error.ErrorController;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
 import tech.aomi.common.web.controller.ErrorControllerImpl;
@@ -24,10 +24,10 @@ import tech.aomi.common.web.controller.ErrorControllerImpl;
 public class WebErrorConfiguration {
 
     @Bean
-    @ConditionalOnBean({ErrorAttributes.class, ServerProperties.class})
+    @ConditionalOnBean(ErrorAttributes.class)
     @ConditionalOnMissingBean(value = ErrorController.class)
-    public ErrorController errorController(ErrorAttributes errorAttributes, ServerProperties serverProperties) {
-        return new ErrorControllerImpl(errorAttributes, serverProperties.getError());
+    public ErrorController errorController(ErrorAttributes errorAttributes) {
+        return new ErrorControllerImpl(errorAttributes, new ErrorProperties());
     }
 
 }

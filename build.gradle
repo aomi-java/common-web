@@ -1,45 +1,69 @@
 plugins {
     id 'java'
-    id "io.freefair.lombok" version "8.1.0"
-    id 'io.spring.dependency-management' version '1.1.4'
+    id 'java-library'
+    id 'maven-publish'
+    id "io.freefair.lombok" version "9.5.0"
+    id 'io.spring.dependency-management' version '1.1.7'
 }
-ext.spring_boot_version = "3.1.4"
-ext.spring_cloud_version = "2022.0.3"
-
 
 group 'tech.aomi.common'
 version '2.1.1_15-SNAPSHOT'
 
-apply from: 'https://onegit.com/enterprise/public/raw/master/spring-libraries.gradle'
-apply from: 'https://onegit.com/enterprise/public/raw/master/idea.gradle'
-apply from: 'https://onegit.com/enterprise/public/raw/master/publish-center.gradle'
-
 java {
-    sourceCompatibility = JavaVersion.VERSION_20
+    toolchain {
+        languageVersion = JavaLanguageVersion.of(26)
+    }
 }
 
 repositories {
     mavenCentral()
     maven {
-        url "https://s01.oss.sonatype.org/content/repositories/snapshots/"
+        url "https://nexus.stelarx.tech/repository/maven-snapshots/"
+        credentials {
+            username System.getenv('REPO_USERNAME')
+            password System.getenv('REPO_PASSWORD')
+        }
     }
 }
 
 dependencyManagement {
     imports {
-        mavenBom "org.springframework.boot:spring-boot-dependencies:${spring_boot_version}"
-        mavenBom "org.springframework.cloud:spring-cloud-dependencies:${spring_cloud_version}"
+        mavenBom "org.springframework.boot:spring-boot-dependencies:4.1.1"
     }
 }
 
 dependencies {
-    compileOnly spring_boot.web
-    compileOnly spring_boot.validation
+    compileOnly 'org.springframework.boot:spring-boot-starter-web'
+    compileOnly 'org.springframework.boot:spring-boot-starter-validation'
 
     compileOnly 'commons-codec:commons-codec:1.16.1'
 
     compileOnly 'tech.aomi.common:exception:1.0.2-SNAPSHOT'
-    compileOnly 'tech.aomi.common:utils:1.0.13_0-SNAPSHOT'
-    compileOnly 'tech.aomi.common:message:1.0.0_1-SNAPSHOT'
+    compileOnly 'tech.aomi.common:utils:1.0.14_0-SNAPSHOT'
+    compileOnly 'tech.aomi.common:message:1.0.0_5-SNAPSHOT'
 
+}
+
+publishing {
+    publications {
+        mavenJava(MavenPublication) {
+            from components.java
+            versionMapping {
+                allVariants {
+                    fromResolutionResult()
+                }
+            }
+        }
+    }
+    repositories {
+        maven {
+            url = project.version.endsWith('-SNAPSHOT')
+                    ? 'https://nexus.stelarx.tech/repository/maven-snapshots/'
+                    : 'https://nexus.stelarx.tech/repository/maven-releases/'
+            credentials {
+                username System.getenv('REPO_USERNAME')
+                password System.getenv('REPO_PASSWORD')
+            }
+        }
+    }
 }
