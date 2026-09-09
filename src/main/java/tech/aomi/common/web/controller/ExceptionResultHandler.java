@@ -1,6 +1,7 @@
 package tech.aomi.common.web.controller;
 
 import lombok.extern.slf4j.Slf4j;
+import org.springframework.http.HttpStatus;
 import org.springframework.http.converter.HttpMessageNotReadableException;
 import org.springframework.validation.BindException;
 import org.springframework.validation.FieldError;
@@ -8,6 +9,7 @@ import org.springframework.web.bind.MethodArgumentNotValidException;
 import org.springframework.web.bind.MissingServletRequestParameterException;
 import org.springframework.web.bind.ServletRequestBindingException;
 import org.springframework.web.method.annotation.MethodArgumentTypeMismatchException;
+import org.springframework.web.servlet.resource.NoResourceFoundException;
 import tech.aomi.common.exception.ErrorCode;
 import tech.aomi.common.exception.ServiceException;
 import tech.aomi.common.utils.MapBuilder;
@@ -31,6 +33,7 @@ public class ExceptionResultHandler {
             .put(BindException.class.getName(), (t) -> bindException((BindException) t))
             .put(MethodArgumentNotValidException.class.getName(), (t) -> methodArgumentNotValidException((MethodArgumentNotValidException) t))
             .put(ServiceException.class.getName(), (t) -> servicesException((ServiceException) t))
+            .put(NoResourceFoundException.class.getName(), (t) -> noResourceFoundException((NoResourceFoundException) t))
 
             .build();
 
@@ -82,6 +85,9 @@ public class ExceptionResultHandler {
         return Result.create(ex.getErrorCode(), "server internal error", ex.getPayload());
     }
 
+    public static Result noResourceFoundException(NoResourceFoundException e) {
+        return new Result(String.valueOf(HttpStatus.NOT_FOUND.value()), HttpStatus.NOT_FOUND.getReasonPhrase(), null, HttpStatus.NOT_FOUND);
+    }
 
     public static Result exception(Throwable ex) {
         if (ex instanceof ServiceException) {
