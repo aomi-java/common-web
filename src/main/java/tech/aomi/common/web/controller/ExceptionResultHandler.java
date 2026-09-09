@@ -79,7 +79,7 @@ public class ExceptionResultHandler {
 
     public static Result servicesException(ServiceException ex) {
         LOGGER.error("控制器发生异常: [{}]", ex.getMessage(), ex);
-        return Result.create(ex.getErrorCode(), ex.getMessage(), ex.getPayload());
+        return Result.create(ex.getErrorCode(), "server internal error", ex.getPayload());
     }
 
 
@@ -88,7 +88,7 @@ public class ExceptionResultHandler {
             return servicesException((ServiceException) ex);
         }
         LOGGER.error("请求执行错误:{}", ex.getMessage(), ex);
-        return Result.create(ErrorCode.EXCEPTION, ex.getMessage(), null);
+        return Result.create(ErrorCode.EXCEPTION, "server internal error", null);
     }
 
 }
