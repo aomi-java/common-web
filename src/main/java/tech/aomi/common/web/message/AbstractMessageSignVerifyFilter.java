@@ -10,25 +10,23 @@ import jakarta.servlet.http.HttpServletResponse;
 import lombok.Getter;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
+import org.jspecify.annotations.NonNull;
 import org.springframework.http.MediaType;
 import org.springframework.util.StreamUtils;
 import org.springframework.web.filter.OncePerRequestFilter;
-import org.springframework.web.util.ContentCachingResponseWrapper;
 
 import tech.aomi.common.message.MessageEncodeDecodeService;
 import tech.aomi.common.message.MessageService;
 import tech.aomi.common.message.entity.MessageContent;
 import tech.aomi.common.message.entity.RequestMessage;
 import tech.aomi.common.web.controller.ExceptionResultHandler;
-import tech.aomi.common.web.controller.Result;
-import tech.aomi.common.web.controller.Result.Entity;
 
 import java.io.ByteArrayInputStream;
 import java.io.IOException;
 import java.util.*;
 
 /**
- * 报文签名、验签过滤器
+ * 报文验签、请求解密过滤器
  */
 @Slf4j
 @Getter
@@ -38,13 +36,15 @@ public abstract class AbstractMessageSignVerifyFilter extends OncePerRequestFilt
     protected final MessageEncodeDecodeService messageEncodeDecodeService;
 
     @Override
-    protected void doFilterInternal(HttpServletRequest request, HttpServletResponse response, FilterChain filterChain)
-            throws ServletException, IOException {
+    protected void doFilterInternal(
+            @NonNull HttpServletRequest request,
+            @NonNull HttpServletResponse response,
+            @NonNull FilterChain filterChain
+    ) throws ServletException, IOException {
 
-        MessageService messageService;
-        ContentCachingResponseWrapper responseWrapper = new ContentCachingResponseWrapper(response);
         try {
             MessageContent content;
+            MessageService messageService;
             if ("get".equalsIgnoreCase(request.getMethod())) {
                 Map<String, String> data = new HashMap<>();
                 while (request.getParameterNames().hasMoreElements()) {
@@ -67,33 +67,21 @@ public abstract class AbstractMessageSignVerifyFilter extends OncePerRequestFilt
 
             Map<String, String[]> modifiableParameters = null;
             if ("get".equalsIgnoreCase(request.getMethod())) {
-                Map<String, String> urlArgs = messageEncodeDecodeService.byte2Message(newBody, HashMap.class);
+                var urlArgs = messageEncodeDecodeService.byte2Message(newBody, HashMap.class);
                 modifiableParameters = new HashMap<>();
-                for (String key : urlArgs.keySet()) {
-                    modifiableParameters.put(key, new String[] { urlArgs.get(key) });
+                for (Object key : urlArgs.keySet()) {
+                    modifiableParameters.put(key.toString(), new String[]{urlArgs.get(key).toString()});
                 }
             }
 
-            filterChain.doFilter(new MessageSignVerifyRequestWrapper(request, modifiableParameters, newBody),
-                    responseWrapper);
-            byte[] responseBody = responseWrapper.getContentAsByteArray();
-            Entity entity = messageEncodeDecodeService.byte2Message(responseBody, Result.Entity.class);
-
-            messageService.createResponse(content, entity.getStatus(), entity.getDescribe(), entity.getPayload());
-
-            byte[] newResponseBody = messageEncodeDecodeService.message2Byte(content.getResponseMessage());
-
-            responseWrapper.resetBuffer();
-            responseWrapper.getOutputStream().write(newResponseBody);
+            filterChain.doFilter(new MessageSignVerifyRequestWrapper(request, modifiableParameters, newBody), response);
 
         } catch (Exception ex) {
             var result = ExceptionResultHandler.getResult(ex);
-            responseWrapper.resetBuffer();
-            responseWrapper.setContentType(MediaType.APPLICATION_JSON_VALUE);
-            responseWrapper.getOutputStream().write(messageEncodeDecodeService.message2Byte(result.getBody()));
-
-        } finally {
-            responseWrapper.copyBodyToResponse();
+            if (!response.isCommitted()) {
+                response.setContentType(MediaType.APPLICATION_JSON_VALUE);
+                response.getOutputStream().write(messageEncodeDecodeService.message2Byte(result.getBody()));
+            }
         }
     }
 
@@ -112,7 +100,7 @@ public abstract class AbstractMessageSignVerifyFilter extends OncePerRequestFilt
          * @throws IllegalArgumentException if the request is null
          */
         public MessageSignVerifyRequestWrapper(HttpServletRequest request, Map<String, String[]> modifiableParameters,
-                byte[] body) {
+                                               byte[] body) {
             super(request);
             this.modifiableParameters = Optional.ofNullable(modifiableParameters).orElse(new HashMap<>());
             this.inputStream = new ByteArrayInputStream(body);

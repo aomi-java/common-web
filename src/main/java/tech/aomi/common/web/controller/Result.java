@@ -1,13 +1,11 @@
 package tech.aomi.common.web.controller;
 
-import com.fasterxml.jackson.annotation.JsonCreator;
-import com.fasterxml.jackson.annotation.JsonProperty;
 import org.springframework.http.HttpHeaders;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.MediaType;
 import org.springframework.http.ResponseEntity;
-import org.springframework.util.StringUtils;
 import tech.aomi.common.exception.ErrorCode;
+import tech.aomi.common.message.entity.BaseMessage;
 
 import java.io.Serializable;
 import java.lang.reflect.Method;
@@ -18,9 +16,9 @@ import java.util.*;
  *
  * @author Sean(sean.snow @ live.com) 2016/1/11
  */
-public class Result extends ResponseEntity<Result.Entity> {
+public class Result extends ResponseEntity<BaseMessage> {
 
-    private final Entity entity;
+    private final BaseMessage entity;
 
     private List<Object> listMessage;
 
@@ -60,7 +58,7 @@ public class Result extends ResponseEntity<Result.Entity> {
 
     public Result(String status, String describe, Object payload, HttpStatus httpStatus, HttpHeaders headers) {
         super(checkHeaders(headers), httpStatus);
-        this.entity = new Entity();
+        this.entity = new BaseMessage();
         this.setStatus(status);
         this.setDescribe(describe);
         this.add(payload);
@@ -68,6 +66,7 @@ public class Result extends ResponseEntity<Result.Entity> {
 
     public void setStatus(String status) {
         this.entity.setStatus(status);
+        this.entity.setSuccess(status.equals(ErrorCode.SUCCESS.getCode()));
     }
 
     public void setDescribe(String describe) {
@@ -138,7 +137,7 @@ public class Result extends ResponseEntity<Result.Entity> {
     }
 
     @Override
-    public Entity getBody() {
+    public BaseMessage getBody() {
         if (null == this.listMessage && null == this.mapMessage) {
             return this.entity;
         }
@@ -169,70 +168,6 @@ public class Result extends ResponseEntity<Result.Entity> {
         result.putAll(Optional.ofNullable(headers).orElse(new HttpHeaders()));
         result.setContentType(MediaType.APPLICATION_JSON);
         return result;
-    }
-
-    public static class Entity implements java.io.Serializable {
-
-        private static final long serialVersionUID = -438851269823077679L;
-
-        private Boolean success;
-
-        /**
-         * 请求处理状态
-         */
-        private String status;
-
-        /**
-         * 结果描述
-         */
-        private String describe;
-
-        /**
-         * 返回的数据
-         */
-        private Object payload;
-
-
-        @JsonCreator
-        public Entity() {
-        }
-
-        @JsonProperty
-        public Object getPayload() {
-            return payload;
-        }
-
-        public void setPayload(Object payload) {
-            this.payload = payload;
-        }
-
-        @JsonCreator
-        public String getDescribe() {
-            return describe;
-        }
-
-        public void setDescribe(String describe) {
-            this.describe = describe;
-        }
-
-        @JsonCreator
-        public String getStatus() {
-            return StringUtils.isEmpty(status) ? ErrorCode.EXCEPTION.getCode() : status;
-        }
-
-        public void setStatus(String status) {
-            this.status = status;
-        }
-
-        @JsonProperty
-        public Boolean getSuccess() {
-            return status != null && status.equals(ErrorCode.SUCCESS.getCode());
-        }
-
-        @Override
-        public String toString() {
-            return "[" + getStatus() + "] " + getDescribe();
-        }
     }
 
 }

@@ -3,7 +3,7 @@ package tech.aomi.common.web.controller;
 import tech.aomi.common.exception.ErrorCode;
 
 /**
- * @author 田尘殇Sean(sean.snow @ live.com) createAt 2016/12/26
+ * @author createAt 2016/12/26
  */
 public class AbstractController {
 
