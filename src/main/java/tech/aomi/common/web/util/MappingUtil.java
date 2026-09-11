@@ -1,6 +1,5 @@
 package tech.aomi.common.web.util;
 
-import org.springframework.web.servlet.mvc.condition.PatternsRequestCondition;
 import org.springframework.web.servlet.mvc.condition.RequestMethodsRequestCondition;
 import org.springframework.web.servlet.mvc.method.annotation.RequestMappingHandlerMapping;
 
@@ -12,7 +11,7 @@ import java.util.Set;
 /**
  * 从RequestMapping中获取所有的请求信息
  *
- * @author 田尘殇Sean(sean.snow @ live.com) createAt 2018/6/19
+ * @author createAt 2018/6/19
  */
 public class MappingUtil {
 
@@ -27,9 +26,8 @@ public class MappingUtil {
     public static Set<Map<String, String>> allMappings(RequestMappingHandlerMapping requestMappingHandlerMapping) {
         Set<Map<String, String>> mappings = new HashSet<>();
         requestMappingHandlerMapping.getHandlerMethods().forEach((requestMappingInfo, handlerMethod) -> {
-            PatternsRequestCondition patternsRequestCondition = requestMappingInfo.getPatternsCondition();
             RequestMethodsRequestCondition methodsRequestCondition = requestMappingInfo.getMethodsCondition();
-            patternsRequestCondition.getPatterns().forEach(uri -> {
+            requestMappingInfo.getPatternValues().forEach(uri -> {
                 methodsRequestCondition.getMethods().forEach(method -> {
                     Map<String, String> mapping = new HashMap<>();
                     mapping.put("uri", uri);
