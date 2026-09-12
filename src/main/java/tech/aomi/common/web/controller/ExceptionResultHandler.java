@@ -12,6 +12,7 @@ import org.springframework.web.method.annotation.MethodArgumentTypeMismatchExcep
 import org.springframework.web.servlet.resource.NoResourceFoundException;
 import tech.aomi.common.exception.ErrorCode;
 import tech.aomi.common.exception.ServiceException;
+import tech.aomi.common.message.exception.MessageConvertException;
 import tech.aomi.common.utils.MapBuilder;
 
 import java.util.HashMap;
@@ -32,14 +33,22 @@ public class ExceptionResultHandler {
             .put(MissingServletRequestParameterException.class.getName(), (t) -> missingServletRequestParameterException((MissingServletRequestParameterException) t))
             .put(BindException.class.getName(), (t) -> bindException((BindException) t))
             .put(MethodArgumentNotValidException.class.getName(), (t) -> methodArgumentNotValidException((MethodArgumentNotValidException) t))
-            .put(ServiceException.class.getName(), (t) -> servicesException((ServiceException) t))
             .put(NoResourceFoundException.class.getName(), (t) -> noResourceFoundException((NoResourceFoundException) t))
 
+            .put(MessageConvertException.class.getName(), (t) -> messageConvertException((MessageConvertException) t))
+
+            .put(ServiceException.class.getName(), (t) -> servicesException((ServiceException) t))
+
             .build();
+
 
     public static Result getResult(Throwable t) {
         Function<Throwable, Result> handler = HANDLERS.getOrDefault(t.getClass().getName(), ExceptionResultHandler::exception);
         return handler.apply(t);
+    }
+
+    public static Result messageConvertException(MessageConvertException t) {
+        return Result.create(ErrorCode.PARAMS_ERROR, t.getMessage(), null);
     }
 
     public static Result illegalArgumentException(Throwable e) {

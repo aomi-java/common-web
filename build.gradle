@@ -7,7 +7,7 @@ plugins {
 }
 
 group 'tech.aomi.common'
-version '2.1.6'
+version '2.1.7'
 
 java {
     toolchain {
