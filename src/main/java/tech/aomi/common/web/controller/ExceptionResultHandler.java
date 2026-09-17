@@ -13,6 +13,7 @@ import org.springframework.web.servlet.resource.NoResourceFoundException;
 import tech.aomi.common.exception.ErrorCode;
 import tech.aomi.common.exception.ServiceException;
 import tech.aomi.common.message.exception.MessageConvertException;
+import tech.aomi.common.message.exception.MessageVerifyException;
 import tech.aomi.common.utils.MapBuilder;
 
 import java.util.HashMap;
@@ -35,6 +36,7 @@ public class ExceptionResultHandler {
             .put(MethodArgumentNotValidException.class.getName(), (t) -> methodArgumentNotValidException((MethodArgumentNotValidException) t))
             .put(NoResourceFoundException.class.getName(), (t) -> noResourceFoundException((NoResourceFoundException) t))
 
+            .put(MessageVerifyException.class.getName(), (t) -> messageVerifyException((MessageVerifyException) t))
             .put(MessageConvertException.class.getName(), (t) -> messageConvertException((MessageConvertException) t))
 
             .put(ServiceException.class.getName(), (t) -> servicesException((ServiceException) t))
@@ -45,6 +47,11 @@ public class ExceptionResultHandler {
     public static Result getResult(Throwable t) {
         Function<Throwable, Result> handler = HANDLERS.getOrDefault(t.getClass().getName(), ExceptionResultHandler::exception);
         return handler.apply(t);
+    }
+
+
+    public static Result messageVerifyException(MessageVerifyException t) {
+        return Result.create(ErrorCode.SIGNATURE_INVALID, null, null);
     }
 
     public static Result messageConvertException(MessageConvertException t) {
