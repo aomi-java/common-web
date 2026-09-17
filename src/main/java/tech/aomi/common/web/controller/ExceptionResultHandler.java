@@ -98,7 +98,11 @@ public class ExceptionResultHandler {
 
     public static Result servicesException(ServiceException ex) {
         LOGGER.error("控制器发生异常: [{}]", ex.getMessage(), ex);
-        return Result.create(ex.getErrorCode(), "server internal error", ex.getPayload());
+        String msg = ex.getMessage();
+        if (ErrorCode.EXCEPTION == ex.getErrorCode()) {
+            msg = "server internal error";
+        }
+        return Result.create(ex.getErrorCode(), msg, ex.getPayload());
     }
 
     public static Result noResourceFoundException(NoResourceFoundException e) {
