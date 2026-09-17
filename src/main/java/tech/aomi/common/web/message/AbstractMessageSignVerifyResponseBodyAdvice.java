@@ -10,6 +10,7 @@ import org.springframework.http.server.ServerHttpResponse;
 import org.springframework.web.context.request.RequestContextHolder;
 import org.springframework.web.context.request.ServletRequestAttributes;
 import org.springframework.web.servlet.mvc.method.annotation.ResponseBodyAdvice;
+import tech.aomi.common.exception.ErrorCode;
 import tech.aomi.common.message.MessageService;
 import tech.aomi.common.message.entity.BaseMessage;
 import tech.aomi.common.message.entity.MessageContent;
@@ -39,6 +40,9 @@ public abstract class AbstractMessageSignVerifyResponseBodyAdvice implements Res
             return body;
         }
         if (!(body instanceof BaseMessage entity)) {
+            return body;
+        }
+        if (!ErrorCode.SUCCESS.getCode().equals(entity.getStatus())) {
             return body;
         }
 

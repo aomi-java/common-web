@@ -7,7 +7,7 @@ plugins {
 }
 
 group 'tech.aomi.common'
-version '2.1.9'
+version '2.1.10'
 
 java {
     toolchain {
@@ -44,6 +44,8 @@ dependencies {
 
     testImplementation 'org.springframework.boot:spring-boot-starter-test'
     testImplementation 'org.springframework.boot:spring-boot-starter-web'
+    testImplementation 'tech.aomi.common:message:1.0.2'
+    testImplementation 'tech.aomi.common:exception:1.0.2-SNAPSHOT'
     testRuntimeOnly 'org.junit.platform:junit-platform-launcher'
 }
 
