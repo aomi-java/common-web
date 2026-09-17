@@ -23,6 +23,8 @@ import tech.aomi.common.web.controller.ExceptionResultHandler;
 
 import java.io.ByteArrayInputStream;
 import java.io.IOException;
+import java.net.URLEncoder;
+import java.nio.charset.StandardCharsets;
 import java.util.*;
 
 /**
@@ -47,8 +49,9 @@ public abstract class AbstractMessageSignVerifyFilter extends OncePerRequestFilt
             MessageService messageService;
             if ("get".equalsIgnoreCase(request.getMethod())) {
                 Map<String, String> data = new HashMap<>();
-                while (request.getParameterNames().hasMoreElements()) {
-                    String name = request.getParameterNames().nextElement();
+                Enumeration<String> parameterNames = request.getParameterNames();
+                while (parameterNames.hasMoreElements()) {
+                    String name = parameterNames.nextElement();
                     String value = request.getParameter(name);
                     data.put(name, value);
                 }
@@ -161,6 +164,22 @@ public abstract class AbstractMessageSignVerifyFilter extends OncePerRequestFilt
                 return modifiableParameters.get(name);
             }
             return super.getParameterValues(name);
+        }
+
+        @Override
+        public String getQueryString() {
+            StringBuilder queryString = new StringBuilder();
+            for (Map.Entry<String, String[]> entry : getParameterMap().entrySet()) {
+                for (String value : entry.getValue()) {
+                    if (queryString.length() > 0) {
+                        queryString.append('&');
+                    }
+                    queryString.append(URLEncoder.encode(entry.getKey(), StandardCharsets.UTF_8))
+                            .append('=')
+                            .append(URLEncoder.encode(value, StandardCharsets.UTF_8));
+                }
+            }
+            return queryString.toString();
         }
     }
 
